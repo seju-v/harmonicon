@@ -1,5 +1,5 @@
 # harmonicon
-primer proyecto hecho con [Processing](https://processing.org/)
+instrumento microtonal hecho con [Processing](https://processing.org/)
 
 usa el teclado como entrada
 keymappeado a las letras minúsculas
@@ -8,3 +8,5 @@ keymappeado a las letras minúsculas
 * v: [a] [s] [d] [f] [g] [h] [j] [k] [l] [ñ] [ḉ]
 * sub: [z] [x] [c] [v] [b] [n] [m] [,] [.] [-]
 * pitchbend: [l_shift + 1] [l_ctrl - 1]
+
+inspirado en el Moog Subharmonicon
