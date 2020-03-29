@@ -1,17 +1,41 @@
 import processing.event.*;
 import processing.sound.*;
-import java.util.Map;
+import java.util.Collection;
 import java.util.function.Consumer;
 
-final HashMap<String, Oscillator> oscs = new HashMap();
 final Integer root = 340;
 
-//KEYS
-String[] lowKeys = {"z", "x", "c", "v", "b", "n", "m", ",", ".", "-"};
-String[] highKeys = {"\t", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "`", "+", "\n"};
-String[] midKeys = {"a", "s", "d", "f", "g", "h", "j", "k", "l", "ñ", "´", "ç"};
-String[] highestKeys = {"º", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "'", "¡"};
-HashMap<String, Integer> keys = new HashMap();
+class Voice {
+  int freq;
+  Oscillator osc;
+  color c;
+  
+  Voice (int freq, Oscillator osc) {
+    this.freq = freq;
+    this.osc  = osc;
+    this.c    = color (
+      random(255) + 48,
+      random(255) + 48,
+      random(255) + 48
+    );
+    
+    osc.freq(freq);
+    osc.amp(0.6);
+  }
+}
+
+// KEYMAP - Here be dragons!
+//    v:         º   1   2   3   4   5   6   7   8   9   0   '   ¡   BACK
+int[] v__keys = {186,49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 39, 161, 8};
+//    iv:       tab  q   w   e   r   t   y   u   i   o   p   `   +
+int[] iv_keys = { 9, 81, 87, 69, 82, 84, 89, 85, 73, 79, 80,-432,43};
+//    i:       lock  a   s   d   f   g   h   j   k   l   ñ   ´   ç   enter
+int[] i__keys = {20, 65, 83, 68, 70, 71, 72, 74, 75, 76,241,-431,231, 10};
+//    sub:    shift  <   z   x   c   v   b   n   m   ,   .   -      menu
+int[] subkeys = {16, 60, 90, 88, 67, 86, 66, 78, 77, 44, 46, 45, 153};
+//    extra:  ctrl(-) alt(+)
+
+HashMap<Integer, Voice> voices = new HashMap();
 
 // PITCH BEND
 float bend = 1;
@@ -25,39 +49,40 @@ final float bendDepth = 9f/8;
 void setup () {
   size(200, 200, P2D);
   mapKeys();
-  makeOscillators();
   strokeWeight(8);
 }
 
 void mapKeys() {
-  for (int i = lowKeys.length -1; i > -1; i--) { // sub
+  // sub
+  for (int i = subkeys.length -1; i > -1; i--) {
+    int kc = subkeys[i];
     int freq = root*2 / (i+4);
-    keys.put(lowKeys[i],freq);
-    keys.put(lowKeys[i].toUpperCase(),freq);
+    Voice v = new Voice(freq, new TriOsc(this));
+    voices.put(kc, v);
   }
-  for (int i = 0; i < midKeys.length; i++) { // i
-    int freq = (3*root/8) * (i+4);
-    keys.put(midKeys[i],freq);
-    keys.put(midKeys[i].toUpperCase(),freq);
-  }
-  for (int i = 0; i < highKeys.length; i++) { // i
+  
+  // i
+  for (int i = 0; i < i__keys.length; i++) {
+    int kc = i__keys[i];
     int freq = (root/4) * (i+3);
-    keys.put(highKeys[i],freq);
-    keys.put(highKeys[i].toUpperCase(),freq);
+    Voice v = new Voice(freq, new TriOsc(this));
+    voices.put(kc, v);
   }
-  for (int i = 0; i < highestKeys.length; i++) { // iv
+  
+  // iv
+  for (int i = 0; i < iv_keys.length; i++) {
+    int kc = iv_keys[i];
     int freq = (root/3) * (i+2);
-    keys.put(highestKeys[i],freq);
+    Voice v = new Voice(freq, new TriOsc(this));
+    voices.put(kc, v);
   }
-}
-
-void makeOscillators() {
-  for (Map.Entry<String, Integer> k : keys.entrySet()) {
-    Integer freq = k.getValue();
-    Oscillator osc = new TriOsc(this);
-    osc.freq(freq);
-    osc.amp(0.5);
-    oscs.put(k.getKey(), osc);
+  
+  // v
+  for (int i = 0; i < v__keys.length; i++) {
+    int kc = v__keys[i];
+    int freq = (3*root/8) * (i+1);
+    Voice v = new Voice(freq, new TriOsc(this));
+    voices.put(kc, v);
   }
 }
 
@@ -71,52 +96,38 @@ void draw () {
     case down:   bend = lerp(bend, 1/bendDepth, bendSpeed); break;
   }
   
-  for (Map.Entry<String, Oscillator> keyosc : oscs.entrySet()) {
-    Oscillator osc = keyosc.getValue();
-    
+  for (Voice v : voices.values()) {
     // bend
-    String letter = keyosc.getKey();
-    Integer freq = keys.get(letter);
-    float newfreq = freq * bend;
-    osc.freq(newfreq);
+    float newfreq = v.freq * bend;
+    v.osc.freq(newfreq);
     
     // draw line
-    if (osc.isPlaying()) {
+    if (v.osc.isPlaying()) {
       float y = map(newfreq, 2000, 0, 0, 200);
+      stroke(v.c);
       line (0,y,200,y);
     }
   }
 }
 
-void newStroke() {
-  stroke(
-    random(255) + 48,
-    random(255) + 48,
-    random(255) + 48
-  );
-}
-
 void keyPressed() {
-  String k = String.valueOf(key);
-  newStroke();
-  if (oscs.containsKey(k)) {
-    oscs.get(k).play();
-  }
-  else if (keyCode == SHIFT) {
-    bendStatus = bendStatuses.up;
+  println(keyCode);
+  if (voices.containsKey(keyCode)) {
+    voices.get(keyCode).osc.play();
   }
   else if (keyCode == CONTROL) {
     bendStatus = bendStatuses.down;
   }
+  else if (keyCode == ALT) {
+    bendStatus = bendStatuses.up;
+  }
 }
 
 void keyReleased() {
-  String k = String.valueOf(key);
-  if (oscs.containsKey(k)) {
-    oscs.get(k.toUpperCase()).stop(); // absolutely necessary if
-    oscs.get(k.toLowerCase()).stop(); // playing with the shift key
+  if (voices.containsKey(keyCode)) {
+    voices.get(keyCode).osc.stop();
   }
-  else if (keyCode == SHIFT || keyCode == CONTROL) {
+  else if (keyCode == CONTROL || keyCode == ALT) {
     bendStatus = bendStatuses.center;
   }
 }
