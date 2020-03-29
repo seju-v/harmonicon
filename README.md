@@ -10,3 +10,9 @@ keymappeado a las letras minúsculas
 * **pitchbend:** [lshift] [ctrl]
 
 inspirado en el Moog Subharmonicon
+
+roadmap:
+* use keycodes instead of characters
+* implement asdr
+* preserve color
+* simple interfascia gui
