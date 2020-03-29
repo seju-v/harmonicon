@@ -9,7 +9,7 @@ keymap:
 * **sub:** [z] [x] [c] [v] [b] [n] [m] [,] [.] [-]
 * **pitchbend:** [lshift] [ctrl]
 
-inspirado en el Moog Subharmonicon
+inspired by the Moog Subharmonicon
 
 to-do:
 * use keycodes instead of characters
