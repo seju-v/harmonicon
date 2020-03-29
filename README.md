@@ -1,8 +1,8 @@
 # harmonicon
-instrumento microtonal hecho con [Processing](https://processing.org/)
+microtonal instrument toy made with [Processing](https://processing.org/)
 
-usa el teclado como entrada
-keymappeado a las letras minúsculas
+use keyboard as input
+keymap:
 * **iv:** [º] [1] [2] [3] [4] [5] [6] [7] [8] [9] [0] ['] [¡]
 * **i:** [tab] [q] [w] [e] [r] [t] [y] [u] [i] [o] [p] [`] [+] [enter]
 * **v:** [a] [s] [d] [f] [g] [h] [j] [k] [l] [ñ] [ḉ]
@@ -11,8 +11,8 @@ keymappeado a las letras minúsculas
 
 inspirado en el Moog Subharmonicon
 
-roadmap:
+to-do:
 * use keycodes instead of characters
-* implement asdr
+* implement adsr
 * preserve color
 * simple interfascia gui
